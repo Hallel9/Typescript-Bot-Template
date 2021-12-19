@@ -17,5 +17,6 @@ export type CommandType = {
     userPermissions?: PermissionResolvable[]
     guildOnly?: Boolean
     ownerOnly?: Boolean
+    directory?: string
     run: RunFunction
 } & ChatInputApplicationCommandData

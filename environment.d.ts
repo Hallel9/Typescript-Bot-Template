@@ -4,6 +4,7 @@ declare global {
             botToken: string
             guildId: string
             enviroment: 'dev' | 'prod' | 'debug'
+            db: string
         }
     }
 }
