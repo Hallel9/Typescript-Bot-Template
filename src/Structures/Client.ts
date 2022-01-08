@@ -10,6 +10,7 @@ import mongoose from 'mongoose'
 config()
 export class ExtendedClient extends Discord.Client {
     commands: Discord.Collection<string, CommandType> = new Discord.Collection()
+    owners = []
     constructor(options: Discord.ClientOptions) {
         super(options)
     }
