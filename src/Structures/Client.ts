@@ -21,9 +21,41 @@ export class ExtendedClient extends Discord.Client {
     async importFile(filePath: string) {
         return (await import(filePath))?.default
     }
-    registerCommands({commands, guildId}: RegisterCommandOptions) {
+    async registerCommands({commands, guildId}: RegisterCommandOptions) {
         if (guildId) {
-            this.guilds.cache.get(guildId)?.commands.set(commands)
+            const guild = await this.guilds.fetch(guildId)
+            await guild.commands.set(commands).then((cmd) => {
+                const getRoles = (commandName) => {
+                    //@ts-ignore
+                    const permissions = commands.find((x) => x.name === commandName).userPermissions
+                    if (!permissions) return null
+                    return guild.roles.cache.filter((x) => x.permissions.has(permissions) && !x.managed)
+                }
+                const fullPermissions = cmd.reduce((accumulator, x) => {
+                    const roles = getRoles(x.name)
+                    if (!roles) return accumulator
+
+                    const permissions = roles.reduce((a, v) => {
+                        return [
+                            ...a,
+                            {
+                                id: v.id,
+                                type: 'ROLE',
+                                permission: true
+                            }
+                        ]
+                    }, [])
+
+                    return [
+                        ...accumulator,
+                        {
+                            id: x.id,
+                            permissions
+                        }
+                    ]
+                }, [])
+                guild.commands.permissions.set({fullPermissions})
+            })
             console.log(`Registering commands to ${guildId}`)
         } else {
             this.guilds.cache.forEach((g) => g.commands.set(commands))

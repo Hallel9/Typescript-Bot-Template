@@ -75,8 +75,8 @@ export default new Command({
             ]
         })
         //@ts-ignore
-        m.react('<a:thumbs__up:818572940944736296>')
+        m.react('👍')
         //@ts-ignore
-        m.react('<a:thumbs__down:818573017402966026>')
+        m.react('👎')
     }
 })

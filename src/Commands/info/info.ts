@@ -60,7 +60,7 @@ export default new Command({
     ],
     run: async ({client, interaction}) => {
         if (interaction.options.getSubcommand() === 'user') {
-            const member = interaction.options.getMember('user') as GuildMember
+            const member = interaction.options.getMember('member') as GuildMember
             const res = await axios.get(`https://discord.com/api/v9/users/${member.id}`, {
                 headers: {
                     Authorization: `Bot ${client.token}`
