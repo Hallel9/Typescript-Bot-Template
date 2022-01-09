@@ -17,6 +17,7 @@ export default new Command({
             const getCommands = client.commands
                 .filter((cmd) => cmd.directory === dir)
                 .map((cmd) => {
+                    if (cmd.ownerOnly) return
                     return {
                         name: cmd.name || 'No Command Name',
                         description: capitalize(cmd.description) || 'No command description'
