@@ -120,8 +120,8 @@ export class ExtendedClient extends Discord.Client {
         // Events
         const eventFiles = await globPromise(`${__dirname}/../Events/**/*{.ts,.js}`)
         eventFiles.forEach(async (filePath) => {
-            const event: Event<keyof Discord.ClientEvents> = await this.importFile(filePath)
-            this.on(event.event, event.run)
+            const event: Event = await this.importFile(filePath)
+            this.on(event.event, event.run.bind(null, this))
         })
     }
     connect() {

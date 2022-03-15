@@ -1,7 +1,7 @@
 import {Event} from '../Structures/Event'
 import {ExtendedInteraction} from '../typings/Command'
 import db from '../models/suggest'
-export default new Event('interactionCreate', async (interaction: ExtendedInteraction) => {
+export default new Event('interactionCreate', async (client, interaction: ExtendedInteraction) => {
     if (!interaction.isButton()) return
     switch (interaction.customId) {
         case 'suggest-accept':

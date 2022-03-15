@@ -1,5 +1,9 @@
 import {ClientEvents} from 'discord.js'
+import {ExtendedClient} from './Client'
 
-export class Event<Key extends keyof ClientEvents> {
-    constructor(public event: Key, public run: (...args: ClientEvents[Key]) => any) {}
+type EventRun = (client: ExtendedClient, ...args: any[]) => any
+export class Event {
+    constructor(public event: keyof ClientEvents, public run: EventRun) {
+        Object.assign(this, {event, run})
+    }
 }
