@@ -1,4 +1,4 @@
-import {ChatInputApplicationCommandData, CommandInteraction, CommandInteractionOptionResolver, GuildMember, PermissionResolvable} from 'discord.js'
+import {ApplicationCommandData, ChatInputApplicationCommandData, CommandInteraction, CommandInteractionOptionResolver, GuildMember, PermissionResolvable} from 'discord.js'
 import {ExtendedClient} from '../Structures/Client'
 
 export interface ExtendedInteraction extends CommandInteraction {
@@ -18,5 +18,6 @@ export type CommandType = {
     guildOnly?: Boolean
     ownerOnly?: Boolean
     directory?: string
+    description?: string
     run: RunFunction
-} & ChatInputApplicationCommandData
+} & ApplicationCommandData
