@@ -7,7 +7,7 @@ export default new Event('interactionCreate', async (client, interaction: Extend
     // Chat Input Commands
     if (interaction.isCommand()) {
         const command = client.commands.get(interaction.commandName)
-        if (!command) return interaction.followUp({content: 'You have used a non existent command.'})
+        if (!command) return interaction.reply({content: 'You have used a non existent command.'})
         command.run({args: interaction.options as CommandInteractionOptionResolver, client, interaction: interaction as ExtendedInteraction})
     }
 })
