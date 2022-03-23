@@ -8,7 +8,7 @@ export interface ExtendedInteraction extends CommandInteraction {
 interface RunOptions {
     client: ExtendedClient
     interaction: ExtendedInteraction
-    args: CommandInteractionOptionResolver
+    args: string[]
 }
 
 type RunFunction = (options: RunOptions) => any
