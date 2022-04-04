@@ -125,6 +125,7 @@ export class ExtendedClient extends Discord.Client {
         })
     }
     connect() {
+        if (!process.env.db) return
         mongoose
             .connect(process.env.db)
             .then(() => console.log(`Connected to mongodb!`))
