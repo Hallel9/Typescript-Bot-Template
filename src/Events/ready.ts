@@ -1,7 +1,13 @@
 import chalk from 'chalk'
-import {Event} from '../Structures/Event'
+import { ExtendedClient } from '../Structures/Client'
+import { BaseEvent } from '../Structures/Event'
 
-export default new Event('ready', (client) => {
-    console.log(chalk.green.bold.underline('Ready!'))
-    client.user.setActivity({name: 'With Typescript', type: 'PLAYING'})
-})
+export default class ReadyEvent extends BaseEvent {
+    constructor() {
+        super('ready')
+    }
+    async run(client: ExtendedClient) {
+        console.log(chalk.green.bold.underline('Ready!'))
+        client.user.setActivity({ name: 'With TypeScript', type: 'PLAYING' })
+    }
+}

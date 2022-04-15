@@ -1,15 +1,17 @@
 import * as Discord from 'discord.js'
-import {CommandType} from '../typings/Command'
-import {glob} from 'glob'
-import {promisify} from 'util'
-import {RegisterCommandOptions} from '../typings/Client'
-import {Event} from './Event'
+import { CommandType } from '../typings/Command'
+import { glob } from 'glob'
+import { promisify } from 'util'
+import { RegisterCommandOptions } from '../typings/Client'
 const globPromise = promisify(glob)
-import {config} from 'dotenv'
+import { config } from 'dotenv'
 import mongoose from 'mongoose'
+import path from 'path'
+import { lstat, readdir } from 'fs/promises'
 config()
 export class ExtendedClient extends Discord.Client {
     commands: Discord.Collection<string, CommandType> = new Discord.Collection()
+    events: Discord.Collection<string, any> = new Discord.Collection()
     owners = []
     constructor(options: Discord.ClientOptions) {
         super(options)
@@ -18,11 +20,12 @@ export class ExtendedClient extends Discord.Client {
         this.registerModules()
         this.login(process.env.botToken)
         this.connect()
+        this.registerEvents('../Events')
     }
     async importFile(filePath: string) {
         return (await import(filePath))?.default
     }
-    async registerCommands({commands, guildId}: RegisterCommandOptions) {
+    async registerCommands({ commands, guildId }: RegisterCommandOptions) {
         if (guildId) {
             const guild = await this.guilds.fetch(guildId)
             await guild.commands.set(commands).then((cmd) => {
@@ -55,7 +58,7 @@ export class ExtendedClient extends Discord.Client {
                         }
                     ]
                 }, [])
-                guild.commands.permissions.set({fullPermissions})
+                guild.commands.permissions.set({ fullPermissions })
             })
             console.log(`Registering commands to ${guildId}`)
         } else {
@@ -90,7 +93,7 @@ export class ExtendedClient extends Discord.Client {
                             }
                         ]
                     }, [])
-                    g.commands.permissions.set({fullPermissions})
+                    g.commands.permissions.set({ fullPermissions })
                 })
             })
             console.log(`Registering commands to all guilds`)
@@ -105,7 +108,7 @@ export class ExtendedClient extends Discord.Client {
             const directory = splitted[splitted.length - 2]
             const command: CommandType = await this.importFile(filePath)
             if (!command.name) return
-            const properties = {directory, ...command}
+            const properties = { directory, ...command }
             console.log(command)
 
             this.commands.set(command.name, properties)
@@ -114,15 +117,22 @@ export class ExtendedClient extends Discord.Client {
             slashCommands.push(command)
         })
         this.on('ready', () => {
-            this.registerCommands({commands: slashCommands, guildId: process.env.guildId})
+            this.registerCommands({ commands: slashCommands, guildId: process.env.guildId })
         })
-
-        // Events
-        const eventFiles = await globPromise(`${__dirname}/../Events/**/*{.ts,.js}`)
-        eventFiles.forEach(async (filePath) => {
-            const event: Event = await this.importFile(filePath)
-            this.on(event.event, event.run.bind(null, this))
-        })
+    }
+    async registerEvents(dir: string) {
+        const filePath = path.join(__dirname, dir)
+        const files = await readdir(filePath)
+        for (const file of files) {
+            const stat = await lstat(path.join(filePath, file))
+            if (stat.isDirectory()) this.registerEvents(path.join(dir, file))
+            if (file.endsWith('.js') || file.endsWith('.ts')) {
+                const { default: Event } = await import(path.join(dir, file))
+                const event = new Event()
+                this.events.set(event.getName(), event)
+                this.on(event.getName(), event.run.bind(event, this))
+            }
+        }
     }
     connect() {
         if (!process.env.db) return
