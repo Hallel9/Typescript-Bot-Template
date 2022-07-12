@@ -28,73 +28,11 @@ export class ExtendedClient extends Discord.Client {
     async registerCommands({ commands, guildId }: RegisterCommandOptions) {
         if (guildId) {
             const guild = await this.guilds.fetch(guildId)
-            await guild.commands.set(commands).then((cmd) => {
-                const getRoles = (commandName) => {
-                    //@ts-ignore
-                    const permissions = commands.find((x) => x.name === commandName).userPermissions
-                    if (!permissions) return null
-                    return guild.roles.cache.filter((x) => x.permissions.has(permissions) && !x.managed)
-                }
-                const fullPermissions = cmd.reduce((accumulator, x) => {
-                    const roles = getRoles(x.name)
-                    if (!roles) return accumulator
-
-                    const permissions = roles.reduce((a, v) => {
-                        return [
-                            ...a,
-                            {
-                                id: v.id,
-                                type: 'ROLE',
-                                permission: true
-                            }
-                        ]
-                    }, [])
-
-                    return [
-                        ...accumulator,
-                        {
-                            id: x.id,
-                            permissions
-                        }
-                    ]
-                }, [])
-                guild.commands.permissions.set({ fullPermissions })
-            })
+            await guild.commands.set(commands)
             console.log(`Registering commands to ${guildId}`)
         } else {
             this.guilds.cache.forEach(async (g) => {
-                await g.commands.set(commands).then((cmd) => {
-                    const getRoles = (commandName) => {
-                        //@ts-ignore
-                        const permissions = commands.find((x) => x.name === commandName).userPermissions
-                        if (!permissions) return null
-                        return g.roles.cache.filter((x) => x.permissions.has(permissions) && !x.managed)
-                    }
-                    const fullPermissions = cmd.reduce((accumulator, x) => {
-                        const roles = getRoles(x.name)
-                        if (!roles) return accumulator
-
-                        const permissions = roles.reduce((a, v) => {
-                            return [
-                                ...a,
-                                {
-                                    id: v.id,
-                                    type: 'ROLE',
-                                    permission: true
-                                }
-                            ]
-                        }, [])
-
-                        return [
-                            ...accumulator,
-                            {
-                                id: x.id,
-                                permissions
-                            }
-                        ]
-                    }, [])
-                    g.commands.permissions.set({ fullPermissions })
-                })
+                await g.commands.set(commands)
             })
             console.log(`Registering commands to all guilds`)
         }
