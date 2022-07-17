@@ -1,7 +1,7 @@
-import {GuildChannel, GuildMember, MessageEmbed, Role} from 'discord.js'
-import {Command} from '../../Structures/Command'
+import { ApplicationCommandOptionType, ChannelType, GuildChannel, GuildMember, EmbedBuilder, Role, Colors } from 'discord.js'
+import { Command } from '../../Structures/Command'
 import axios from 'axios'
-import {capitalize} from '../../functions/capitalize'
+import { capitalize } from '../../functions/capitalize'
 
 export default new Command({
     name: 'info',
@@ -10,12 +10,12 @@ export default new Command({
         {
             name: 'user',
             description: 'Show info for a user',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'member',
                     description: 'Show info for a member',
-                    type: 'USER',
+                    type: ApplicationCommandOptionType.User,
                     required: true
                 }
             ]
@@ -23,26 +23,26 @@ export default new Command({
         {
             name: 'channel',
             description: 'Show info for a channel',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'ch',
                     description: 'Show info for a channel',
-                    type: 'CHANNEL',
+                    type: ApplicationCommandOptionType.Channel,
                     required: true,
-                    channelTypes: ['GUILD_TEXT', 'GUILD_VOICE']
+                    channelTypes: [ChannelType.GuildText, ChannelType.GuildVoice]
                 }
             ]
         },
         {
             name: 'role',
             description: 'Show info for a role',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'r',
                     description: 'Show info for a role',
-                    type: 'ROLE',
+                    type: ApplicationCommandOptionType.Role,
                     required: true
                 }
             ]
@@ -50,15 +50,15 @@ export default new Command({
         {
             name: 'server',
             description: 'Show info for a server',
-            type: 'SUB_COMMAND'
+            type: ApplicationCommandOptionType.Subcommand
         },
         {
             name: 'bot',
             description: 'Show info for the bot',
-            type: 'SUB_COMMAND'
+            type: ApplicationCommandOptionType.Subcommand
         }
     ],
-    run: async ({client, interaction}) => {
+    run: async ({ client, interaction }) => {
         if (interaction.options.getSubcommand() === 'user') {
             const member = interaction.options.getMember('member') as GuildMember
             const res = await axios.get(`https://discord.com/api/v9/users/${member.id}`, {
@@ -66,12 +66,12 @@ export default new Command({
                     Authorization: `Bot ${client.token}`
                 }
             })
-            const {banner, accent_color} = res.data
+            const { banner, accent_color } = res.data
             if (banner) {
                 const extension = banner.startsWith('a_') ? '.gif' : '.png'
                 const url = `https://cdn.discordapp.com/banners/${member.id}/${banner}${extension}`
-                const embed = new MessageEmbed()
-                    .setAuthor(member.user.tag, member.user.displayAvatarURL({dynamic: true, format: 'png', size: 1024}))
+                const embed = new EmbedBuilder()
+                    .setAuthor({ name: member.user.tag, iconURL: member.user.displayAvatarURL({ forceStatic: true, extension: 'png', size: 1024 }) })
                     .setColor(member.displayHexColor)
                     .addFields(
                         {
@@ -99,11 +99,11 @@ export default new Command({
                         }
                     )
                     .setImage(url)
-                interaction.reply({embeds: [embed]})
+                interaction.reply({ embeds: [embed] })
             } else {
                 if (accent_color) {
-                    const embed = new MessageEmbed()
-                        .setAuthor(member.user.tag, member.user.displayAvatarURL({dynamic: true, format: 'png', size: 1024}))
+                    const embed = new EmbedBuilder()
+                        .setAuthor({ name: member.user.tag, iconURL: member.user.displayAvatarURL({ forceStatic: true, extension: 'png', size: 1024 }) })
                         .setColor(accent_color)
                         .addFields(
                             {
@@ -130,17 +130,19 @@ export default new Command({
                                 inline: true
                             }
                         )
-                        .setImage(member.displayAvatarURL({dynamic: true, format: 'png', size: 1024}))
-                    interaction.reply({embeds: [embed]})
+                        .setImage(member.displayAvatarURL({ forceStatic: true, extension: 'png', size: 1024 }))
+                    interaction.reply({ embeds: [embed] })
                 } else {
-                    const embed = new MessageEmbed()
+                    const embed = new EmbedBuilder()
                         .setAuthor(
-                            member.user.tag,
-                            member.displayAvatarURL({
-                                dynamic: true,
-                                format: 'png',
-                                size: 1024
-                            })
+                            {
+                                name: member.user.tag,
+                                iconURL: member.displayAvatarURL({
+                                    forceStatic: true,
+                                    extension: 'png',
+                                    size: 1024
+                                })
+                            }
                         )
                         .setColor(member.displayHexColor)
                         .addFields(
@@ -175,20 +177,20 @@ export default new Command({
                         )
                         .setImage(
                             member.user.displayAvatarURL({
-                                dynamic: true,
-                                format: 'png',
+                                forceStatic: true,
+                                extension: 'png',
                                 size: 1024
                             })
                         )
-                    interaction.reply({embeds: [embed]})
+                    interaction.reply({ embeds: [embed] })
                 }
             }
         } else if (interaction.options.getSubcommand() === 'channel') {
             const channel = interaction.options.getChannel('ch') as GuildChannel
             if (channel === null) return console.log('Channel is null')
-            const channelEmbed = new MessageEmbed()
-                .setAuthor(channel.name)
-                .setColor('WHITE')
+            const channelEmbed = new EmbedBuilder()
+                .setAuthor({ name: channel.name })
+                .setColor(Colors.White)
                 .addFields(
                     {
                         name: 'id',
@@ -211,12 +213,12 @@ export default new Command({
                         inline: true
                     }
                 )
-            interaction.reply({embeds: [channelEmbed]})
+            interaction.reply({ embeds: [channelEmbed] })
         } else if (interaction.options.getSubcommand() === 'role') {
             const role = interaction.options.getRole('r') as Role
             if (role === null) return console.log('role is null')
-            const roleEmbed = new MessageEmbed()
-                .setAuthor(role.name)
+            const roleEmbed = new EmbedBuilder()
+                .setAuthor({ name: role.name })
                 .setColor(role.color)
                 .addFields(
                     {
@@ -254,14 +256,14 @@ export default new Command({
                         inline: true
                     }
                 )
-            interaction.reply({embeds: [roleEmbed]})
+            interaction.reply({ embeds: [roleEmbed] })
         } else if (interaction.options.getSubcommand() == 'server') {
             const members = await interaction.guild.members.fetch()
             const owner = await interaction.guild.fetchOwner()
             const server = interaction.guild
-            const serverEmbed = new MessageEmbed()
-                .setAuthor(server.name)
-                .setColor('WHITE')
+            const serverEmbed = new EmbedBuilder()
+                .setAuthor({ name: server.name })
+                .setColor(Colors.White)
                 .addFields(
                     {
                         name: 'id',
@@ -324,12 +326,12 @@ export default new Command({
                         inline: true
                     }
                 )
-            interaction.reply({embeds: [serverEmbed]})
+            interaction.reply({ embeds: [serverEmbed] })
         } else if (interaction.options.getSubcommand() === 'bot') {
             const type = client.user.presence.activities[0].type
-            const bot = interaction.guild.me
-            const botEmbed = new MessageEmbed()
-                .setAuthor(client.user.tag)
+            const bot = interaction.guild.members.me
+            const botEmbed = new EmbedBuilder()
+                .setAuthor({ name: client.user.tag })
                 .setColor(client.user.accentColor)
                 .addFields(
                     {
@@ -354,11 +356,11 @@ export default new Command({
                     },
                     {
                         name: 'Activity',
-                        value: `${client.user.presence.activities.length > 0 ? `${type.charAt(0).toUpperCase() + type.slice(1)} **${client.user.presence.activities[0].name}**` : 'None'}`,
+                        value: `${client.user.presence.activities.length > 0 ? `${type.toString().charAt(0).toUpperCase() + type.toString().slice(1)} **${client.user.presence.activities[0].name}**` : 'None'}`,
                         inline: true
                     }
                 )
-            interaction.reply({embeds: [botEmbed]})
+            interaction.reply({ embeds: [botEmbed] })
         }
     }
 })

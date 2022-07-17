@@ -3,6 +3,7 @@ import { ExtendedClient } from '../Structures/Client'
 
 export interface ExtendedInteraction extends CommandInteraction {
     member: GuildMember
+    options: CommandInteractionOptionResolver
 }
 
 export interface ExtendedButtonInteraction extends ButtonInteraction {

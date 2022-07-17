@@ -1,10 +1,10 @@
-import {Command} from '../../Structures/Command'
-import {capitalize} from '../../functions/capitalize'
-import Discord from 'discord.js'
+import { Command } from '../../Structures/Command'
+import { capitalize } from '../../functions/capitalize'
+import Discord, { ButtonInteraction, Colors, ComponentType, InteractionType, SelectMenuBuilder } from 'discord.js'
 export default new Command({
     name: 'help',
     description: 'Get help on a command.',
-    run: async ({client, interaction}) => {
+    run: async ({ client, interaction }) => {
         const args = []
         const emojis = {
             info: 'ℹ️',
@@ -28,10 +28,12 @@ export default new Command({
                 commands: getCommands
             }
         })
-        const embed = new Discord.MessageEmbed().setColor('GREY').setDescription('Please choose a category from the dropdown menu')
+        const embed = new Discord.EmbedBuilder().setColor(Colors.Red).setDescription('Please choose a category from the dropdown menu')
         const components = (state) => [
-            new Discord.MessageActionRow().addComponents(
-                new Discord.MessageSelectMenu()
+            new Discord.ActionRowBuilder<SelectMenuBuilder>(
+
+            ).addComponents(
+                new Discord.SelectMenuBuilder()
                     .setCustomId('help-menu')
                     .setPlaceholder('Please select a category')
                     .setDisabled(state)
@@ -47,13 +49,13 @@ export default new Command({
                     )
             )
         ]
-        await interaction.reply({embeds: [embed], components: components(false)})
-        const collector = interaction.channel.createMessageComponentCollector({componentType: 'SELECT_MENU', time: 30000})
+        await interaction.reply({ embeds: [embed], components: components(false) })
+        const filter = (i: ButtonInteraction) => i.user.id === interaction.user.id
+        const collector = interaction.channel.createMessageComponentCollector({ componentType: ComponentType.SelectMenu, time: 30000 })
         collector.on('collect', async (i) => {
-            if (i.user.id !== interaction.user.id) return i.reply({embeds: [{description: 'You cannot click this button', color: 'RED'}], ephemeral: true})
             const [directory] = i.values
             const category = categories.find((x) => x.directory.toLowerCase() === directory)
-            const embed1 = new Discord.MessageEmbed()
+            const embed1 = new Discord.EmbedBuilder()
                 .setTitle(`${emojis[directory.toLowerCase()] || ''} ${capitalize(directory)} commands`)
                 .setDescription('Here is the list of commands')
                 .addFields(
@@ -65,10 +67,10 @@ export default new Command({
                         }
                     })
                 )
-            i.update({embeds: [embed1]})
+            i.update({ embeds: [embed1] })
         })
         collector.on('end', () => {
-            interaction.editReply({components: components(true)})
+            interaction.editReply({ components: components(true) })
         })
     }
 })
