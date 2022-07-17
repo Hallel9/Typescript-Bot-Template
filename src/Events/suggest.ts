@@ -1,18 +1,18 @@
 import { ExtendedClient } from '../Structures/Client'
 import { BaseEvent } from '../Structures/Event'
-import { ExtendedInteraction } from '../typings/Command'
+import { ExtendedButtonInteraction, ExtendedInteraction } from '../typings/Command'
 import db from '../models/suggest'
+import { InteractionType, PermissionFlagsBits } from 'discord.js'
 
 export default class InteractionCreateEvent extends BaseEvent {
     constructor() {
         super('interactionCreate')
     }
-    async run(client: ExtendedClient, interaction: ExtendedInteraction) {
-        if (!interaction.isButton()) return
+    async run(client: ExtendedClient, interaction: ExtendedButtonInteraction) {
         switch (interaction.customId) {
             case 'suggest-accept':
                 {
-                    if (!interaction.member.permissions.has('MANAGE_MESSAGES')) return interaction.reply({ content: 'You cannot use this button', ephemeral: true })
+                    if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages)) return interaction.reply({ content: 'You cannot use this button', ephemeral: true })
                     const data = await db.findOne({ Guild: interaction.guildId, MessageID: interaction.message.id })
                     if (!data) return interaction.reply({ content: 'No data was found in the database', ephemeral: true })
                     const embed = interaction.message.embeds[0]

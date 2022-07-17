@@ -1,4 +1,5 @@
 import chalk from 'chalk'
+import { ActivityType } from 'discord.js'
 import { ExtendedClient } from '../Structures/Client'
 import { BaseEvent } from '../Structures/Event'
 
@@ -8,6 +9,6 @@ export default class ReadyEvent extends BaseEvent {
     }
     async run(client: ExtendedClient) {
         console.log(chalk.green.bold.underline('Ready!'))
-        client.user.setActivity({ name: 'With TypeScript', type: 'PLAYING' })
+        client.user.setActivity({ name: 'With TypeScript', type: ActivityType.Listening })
     }
 }
