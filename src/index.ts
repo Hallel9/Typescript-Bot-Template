@@ -1,7 +1,8 @@
-import {ExtendedClient} from './Structures/Client'
+import { GatewayCloseCodes, GatewayIntentBits } from 'discord.js'
+import { ExtendedClient } from './Structures/Client'
 
 export const client = new ExtendedClient({
-    intents: 32767
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers]
 })
 
 client.start()
