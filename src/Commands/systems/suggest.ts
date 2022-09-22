@@ -1,5 +1,5 @@
 import { Command } from '../../Structures/Command'
-import Discord, { ApplicationCommandOptionType, ButtonStyle, Colors, ActionRowBuilder, ComponentType, ButtonBuilder } from 'discord.js'
+import Discord, { ApplicationCommandOptionType, ButtonStyle, Colors, ActionRowBuilder, ComponentType, ButtonBuilder, TextChannel } from 'discord.js'
 import db from '../../models/suggest'
 export default new Command({
     name: 'suggest',
@@ -61,7 +61,8 @@ export default new Command({
             )
             .setTimestamp()
         const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId('suggest-accept').setLabel('Accept').setStyle(ButtonStyle.Success).setEmoji('<:greytick:907281080346882058>'), new Discord.ButtonBuilder().setCustomId('suggest-decline').setLabel('Decline').setStyle(ButtonStyle.Danger).setEmoji('<:greycross:907281080275599401>'))
-        const m = await interaction.reply({ embeds: [embed], components: [buttons], fetchReply: true })
+        const channel = await interaction.guild.channels.fetch('1021510539320512522') as TextChannel
+        const m = await channel.send({ embeds: [embed], components: [buttons] })
 
         await db.create({
             Guild: interaction.guild.id,
@@ -74,9 +75,7 @@ export default new Command({
                 }
             ]
         })
-        //@ts-ignore
         m.react('👍')
-        //@ts-ignore
         m.react('👎')
     }
 })
